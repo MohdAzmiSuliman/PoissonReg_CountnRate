@@ -66,8 +66,31 @@ augment(credit_poismod, type.predict = "response") # rate
 ## Residual
 
 ```{r}
-augment(credit_poismod) # pearson residual
-augment(credit_poismod, type.residual = "response") # raw residual
+augment(credit_poismod, type.residual = "pearson") # pearson residual - same with residual()
+augment(credit_poismod, type.predict = "response", type.residual = "response") # raw residual - same with estimated rate (.fitted) - observed rate (crccards)
 
+```
+
+## Plot
+
+### observed overlap with predicted
+
+```{r}
+augm_predrate_credit_poismod <- augment(credit_poismod, type.predict = "response")
+ggplot(augm_predrate_credit_poismod, aes(x=income)) +
+  geom_point(aes(y=crccards), colour = "blue") + geom_line(aes(y=crccards), colour = "blue") +
+  geom_point(aes(y=.fitted), colour = "red") + geom_line(aes(y=.fitted), colour = "red") 
+```
+
+## Predict w new dataset
+
+```{r}
+newds <- data.frame(income = seq(25,85,10),
+                    logcases = log(6))
+newds
+```
+
+```{r}
+augment(credit_poismod, newdata = newds, type.predict = "response")
 ```
 
