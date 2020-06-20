@@ -1,0 +1,73 @@
+---
+title: "Regression for Rate"
+author: "Mohd Azmi"
+date: "20/06/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Environment
+
+## Library
+
+```{r}
+library(pacman)
+p_load(tidyverse, haven, broom, janitor, summarytools)
+```
+
+## Dataset
+
+```{r}
+creditds <- read_table("creditcard.txt", col_names = c("income", "cases", "crccards"))
+creditds <- creditds %>% mutate(logcases = log(cases))
+creditds
+descr(creditds)
+```
+
+```{r}
+ggplot(creditds, aes(income)) + geom_histogram()
+ggplot(creditds, aes(cases)) + geom_bar()
+ggplot(creditds, aes(crccards)) + geom_bar()
+ggplot(creditds, aes(logcases)) + geom_bar()
+
+```
+
+# Analysis
+
+## Poisson Linear model
+
+```{r}
+credit_poismod <- glm(crccards ~ income + offset(logcases), family = poisson, data = creditds)
+summary(credit_poismod)
+```
+
+## Estimation
+
+```{r}
+tidy(credit_poismod, conf.int = T) %>% 
+  mutate(incidence.rate.ratio = exp(estimate),
+         llci = exp(conf.low),
+         ulci = exp(conf.high)) %>% 
+  select(term, estimate, incidence.rate.ratio, llci, ulci, p.value)
+```
+
+## Prediction
+
+```{r}
+augment(credit_poismod, type.predict = "link") # log rate
+augment(credit_poismod, type.predict = "response") # rate
+#augment(credit_poismod, type.predict = "term") # error due to redundent column name
+
+```
+
+## Residual
+
+```{r}
+augment(credit_poismod) # pearson residual
+augment(credit_poismod, type.residual = "response") # raw residual
+
+```
+
