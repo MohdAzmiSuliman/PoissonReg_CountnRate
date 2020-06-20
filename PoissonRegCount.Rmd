@@ -90,3 +90,13 @@ publish_longdts <- augment(art_allmod, type.predict = "term") # calculate ? for 
 head(predict(art_allmod, type = "link"))
 ```
 
+
+
+```{r}
+augmentdata <- augment(art_allmod, type.predict = "response") # count
+ggplot(publishds2, aes(art)) + geom_histogram() + scale_x_continuous(breaks = seq(0,20,1))
+ggplot(augmentdata, aes(.fitted)) + geom_histogram() + scale_x_continuous(breaks = seq(0,20,1)) + 
+  geom_histogram(data = publishds2, aes(art), c) 
+
+```
+
